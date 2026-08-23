@@ -3,8 +3,9 @@ services:
     build: .
     container_name: minecraft
     restart: unless-stopped
+    stop_grace_period: 30s
     ports:
-      - "${SERVER_PORT:-25565}:25565"
+      - "${SERVER_PORT:-25565}:25565/tcp"
     environment:
       SERVER_NAME: "${SERVER_NAME:-Minecraft Server}"
       SERVER_TYPE: "${SERVER_TYPE:-paper}"
@@ -12,7 +13,14 @@ services:
       SERVER_RAM: "${SERVER_RAM:-2048}"
       SERVER_PORT: "25565"
       EULA: "${EULA:-TRUE}"
+      JAVA_OPTS: "${JAVA_OPTS:-}"
     volumes:
       - ./data:/minecraft
     stdin_open: true
     tty: true
+    healthcheck:
+      test: ["CMD-SHELL", "test -s /minecraft/server.jar && test -f /minecraft/eula.txt"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
