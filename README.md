@@ -1,25 +1,22 @@
-# mc
+# Minecraft Docker Server
 
-Universal Minecraft server Docker image with automatic server JAR download and startup configuration.
+Universal Minecraft server image with automatic JAR download and startup configuration.
 
 ## Features
 
 - Vanilla, Paper, Purpur, Folia, LeafMC
 - Fabric, Forge, NeoForge, Quilt
 - Velocity, Waterfall, BungeeCord
-- Automatic JAR download from MCJarFiles endpoints
+- Automatic server JAR download from MCJarFiles endpoints
 - Configurable server name, type, version, RAM, port and EULA
 - Persistent `/minecraft` data volume
 - Docker Compose support
-- Automatic multi-architecture image builds and GHCR publishing
+- GitHub Actions multi-architecture builds
+- Automatic publish to GHCR
 
-## Quick start
+## Configuration
 
-```bash
-docker compose up -d --build
-```
-
-Create `.env` from `.env.example` and edit it:
+Set these environment variables:
 
 ```env
 SERVER_NAME=My SMP
@@ -30,13 +27,15 @@ SERVER_PORT=25565
 EULA=TRUE
 ```
 
-The published image is available at:
+## Docker Compose
 
-```text
-ghcr.io/nobita329/mc:latest
+```bash
+docker compose up -d --build
 ```
 
-## Docker run
+The Compose file uses `./data:/minecraft` so worlds and server files persist outside the container.
+
+## Docker
 
 ```bash
 docker run -d \
@@ -52,8 +51,15 @@ docker run -d \
   ghcr.io/nobita329/mc:latest
 ```
 
-## Notes
+## Build locally
 
-The container downloads `server.jar` on first startup. Server files and world data are kept in `/minecraft`, so use a persistent volume.
+```bash
+docker build -t mc-server .
+docker run -d --name minecraft -p 25565:25565 -v mc-data:/minecraft -e EULA=TRUE mc-server
+a```
 
-Do not put GitHub tokens, API keys, or other secrets in the image or repository.
+## Important
+
+The server JAR is downloaded when `server.jar` does not already exist. Existing data is reused on later starts.
+
+Do not place GitHub tokens, API keys, or other secrets in the Docker image or repository.
